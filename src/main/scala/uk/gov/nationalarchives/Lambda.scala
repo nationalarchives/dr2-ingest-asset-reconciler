@@ -51,10 +51,9 @@ class Lambda extends RequestStreamHandler {
       asset <- IO.fromOption(assetItems.headOption)(
         new Exception(s"No asset found for ${input.assetId} from ${input.batchId}")
       )
-      _ <-
-        if (asset.`type` != Asset)
-          IO.raiseError(new Exception(s"Object ${asset.id} is of type ${asset.`type`} and not 'Asset'"))
-        else IO.unit
+      _ <- IO.raiseWhen(asset.`type` != Asset)(
+        new Exception(s"Object ${asset.id} is of type ${asset.`type`} and not 'Asset'")
+      )
 
       logCtx = Map("batchId" -> input.batchId, "assetId" -> asset.id.toString)
       log = logger.info(logCtx)(_)
