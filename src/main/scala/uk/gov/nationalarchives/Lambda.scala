@@ -37,11 +37,13 @@ class Lambda extends RequestStreamHandler {
   }
 
   override def handleRequest(inputStream: InputStream, output: OutputStream, context: Context): Unit = {
-    val inputString = inputStream.readAllBytes().map(_.toChar).mkString
-    val input = read[Input](inputString)
 
     for {
       config <- configIo
+      input <- IO {
+        val inputString = inputStream.readAllBytes().map(_.toChar).mkString
+        read[Input](inputString)
+      }
       assetItems <- dADynamoDBClient.getItems[AssetDynamoTable, PartitionKey](
         List(PartitionKey(input.assetId)),
         config.dynamoTableName
