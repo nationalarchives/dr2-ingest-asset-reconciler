@@ -91,8 +91,8 @@ class Lambda extends RequestStreamHandler {
               .flatSequence
 
             _ <- log(s"Bitstreams of Content Objects have been retrieved from API")
-
-            childrenThatDidNotMatchOnChecksum =
+          } yield {
+            val childrenThatDidNotMatchOnChecksum =
               children.filter { child =>
                 val bitstreamWithSameChecksum = bitstreamInfoPerContentObject.find { bitstreamInfo =>
                   child.checksumSha256 == bitstreamInfo.fixity.value &&
@@ -101,7 +101,7 @@ class Lambda extends RequestStreamHandler {
 
                 bitstreamWithSameChecksum.isEmpty
               }
-          } yield
+
             if (childrenThatDidNotMatchOnChecksum.isEmpty) StateOutput(wasReconciled = true, "")
             else {
               val idsOfChildrenThatDidNotMatchOnChecksum = childrenThatDidNotMatchOnChecksum.map(_.id)
@@ -111,6 +111,7 @@ class Lambda extends RequestStreamHandler {
                   s"a checksum could not be found for: ${idsOfChildrenThatDidNotMatchOnChecksum.mkString(", ")}"
               )
             }
+          }
         }
     } yield output.write(write(stateOutput).getBytes())
   }.onError(logLambdaError).unsafeRunSync()
