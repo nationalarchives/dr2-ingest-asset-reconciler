@@ -70,7 +70,7 @@ class Lambda extends RequestStreamHandler {
         entitiesClient.getContentObjectsFromRepresentation(entity.ref, Preservation, generationVersion)
       }.flatSequence
 
-      _ <- log(s"Content Objects, belonging to the representation, have been retrieved from API")
+      _ <- log("Content Objects, belonging to the representation, have been retrieved from API")
 
       stateOutput <-
         if (contentObjects.isEmpty)
