@@ -33,6 +33,7 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
   val assetParentPath: String = "a/parent/path"
   val childIdJson: UUID = UUID.fromString("feedd76d-e368-45c8-96e3-c37671476793")
   val childIdDocx: UUID = UUID.fromString("a25d33f3-7726-4fb3-8e6f-f66358451c4e")
+  val docxTitle: String = "TestTitle"
   val batchId: String = "TEST-ID"
   val executionId = "5619e6b0-e959-4e61-9f6e-17170f7c06e2-3a3443ae-92c4-4fc8-9cbd-10c2a58b6045"
   val inputJson: String =
@@ -46,6 +47,9 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
        |    {
        |      "checksum_sha256": {
        |        "S": "f7523c5d03a2c850fa06b5bbfed4c216f6368826"
+       |      },
+       |      "title": {
+       |        "S": "$docxTitle"
        |      },
        |      "fileExtension": {
        |        "S": "docx"
@@ -63,7 +67,7 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
        |        "S": "parent/path"
        |      },
        |      "name": {
-       |        "S": "$batchId.docx"
+       |        "S": "$docxTitle.docx"
        |      },
        |      "type": {
        |        "S": "File"
@@ -238,7 +242,7 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
         Entity(
           Some(ContentObject),
           UUID.fromString("fc0a687d-f7fa-454e-941a-683bbf5594b1"),
-          None,
+          Some(s"$docxTitle.docx"),
           None,
           false,
           Some(ContentObject.entityPath),
@@ -248,7 +252,7 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
         Entity(
           Some(ContentObject),
           UUID.fromString("4dee285b-64e4-49f8-942e-84ab460b5af6"),
-          None,
+          Some(s"$batchId.json"),
           None,
           false,
           Some(ContentObject.entityPath),
@@ -258,23 +262,32 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
       )
     )
 
-  private val defaultBitStreamInfo =
-    IO(
-      Seq(
-        BitStreamInfo(
-          s"$batchId.docx",
-          1234,
-          "http://localhost/api/entity/content-objects/fc0a687d-f7fa-454e-941a-683bbf5594b1/generations/1/bitstreams/1/content",
-          Fixity("SHA256", "f7523c5d03a2c850fa06b5bbfed4c216f6368826")
-        ),
-        BitStreamInfo(
-          s"$batchId.json",
-          1235,
-          "http://localhost/api/entity/content-objects/4dee285b-64e4-49f8-942e-84ab460b5af6/generations/1/bitstreams/1/content",
-          Fixity("SHA256", "a8cfe9e6b5c10a26046c849cd3776734626e74a2")
+  private val defaultBitStreamInfo = {
+    Seq(
+      IO(
+        Seq(
+          BitStreamInfo(
+            s"84cca074-a7bc-4740-9418-bcc9df9fef7e.docx",
+            1234,
+            "http://localhost/api/entity/content-objects/fc0a687d-f7fa-454e-941a-683bbf5594b1/generations/1/bitstreams/1/content",
+            Fixity("SHA256", "f7523c5d03a2c850fa06b5bbfed4c216f6368826"),
+            Some(s"$docxTitle.docx")
+          )
+        )
+      ),
+      IO(
+        Seq(
+          BitStreamInfo(
+            s"9ef5eb16-3017-401f-8180-cf74c2c25ec1.json",
+            1235,
+            "http://localhost/api/entity/content-objects/4dee285b-64e4-49f8-942e-84ab460b5af6/generations/1/bitstreams/1/content",
+            Fixity("SHA256", "a8cfe9e6b5c10a26046c849cd3776734626e74a2"),
+            Some(s"$batchId.json")
+          )
         )
       )
     )
+  }
 
   def stubGetRequest(batchGetResponse: String): Unit =
     dynamoServer.stubFor(
@@ -298,7 +311,7 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
       entitiesWithIdentifier: IO[Seq[Entity]] = defaultIoWithIdentifier,
       urlsToIoRepresentations: IO[Seq[String]] = defaultUrlToIoRep,
       contentObjectsFromReps: IO[Seq[Entity]] = defaultContentObjectsFromRep,
-      bitstreamInfo: IO[Seq[BitStreamInfo]] = defaultBitStreamInfo
+      bitstreamInfo: Seq[IO[Seq[BitStreamInfo]]] = defaultBitStreamInfo
   ) extends Lambda {
     override lazy val entitiesClientIO: IO[EntityClient[IO, Fs2Streams[IO]]] = {
       when(
@@ -315,7 +328,7 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
 
       when(
         mockEntityClient.getBitstreamInfo(any[UUID])
-      ).thenReturn(bitstreamInfo)
+      ).thenReturn(bitstreamInfo.head, bitstreamInfo(1))
 
       IO(mockEntityClient)
     }

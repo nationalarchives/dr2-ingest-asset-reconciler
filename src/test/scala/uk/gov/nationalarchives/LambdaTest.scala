@@ -26,10 +26,12 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
 
   private val defaultDocxChecksum = "f7523c5d03a2c850fa06b5bbfed4c216f6368826"
   private val defaultJsonChecksum = "a8cfe9e6b5c10a26046c849cd3776734626e74a2"
-  private val defaultFileName = "TEST-ID"
+  private val defaultDocxTitle = "TestTitle"
+  private val defaultJsonName = "TEST-ID"
 
   private val nonMatchingChecksumValue = "non-matchingChecksum"
-  private val nonMatchingFileName = "non-matchingFileName"
+  private val nonMatchingDocxTitle = "non-matchingDocxTitle"
+  private val nonMatchingJsonName = "non-matchingJsonName"
 
   private val docxFileIdInList = List("a25d33f3-7726-4fb3-8e6f-f66358451c4e")
   private val jsonFileIdInList = List("feedd76d-e368-45c8-96e3-c37671476793")
@@ -38,7 +40,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     (
       "DDB docxChecksum",
       "DDB jsonChecksum",
-      "DDB docx name",
+      "DDB docx title",
       "DDB json name",
       "ids that failed to match",
       "reason for failure"
@@ -46,122 +48,122 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     (
       defaultDocxChecksum,
       defaultJsonChecksum,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       jsonFileIdInList,
       "json file name doesn't match"
     ),
     (
       defaultDocxChecksum,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList,
-      "docx file name doesn't match"
+      "docx file title doesn't match"
     ),
     (
       defaultDocxChecksum,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "docx file name & json file name doesn't match"
+      "docx file title & json file name doesn't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      s"$defaultFileName.json",
+      defaultDocxTitle,
+      s"$defaultJsonName.json",
       jsonFileIdInList,
       "json checksum doesn't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       jsonFileIdInList,
       "json checksum & json file name don't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList ++ jsonFileIdInList,
-      "json checksum & docx file name don't match"
+      "json checksum & docx file title don't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "json checksum, docx file name & json file name don't match"
+      "json checksum, docx file title & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      s"$defaultFileName.docx",
-      s"$defaultFileName.json",
+      defaultDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList,
       "docx checksum doesn't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
       "docx checksum & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList,
-      "docx checksum & docx file name don't match"
+      "docx checksum & docx file title don't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "docx checksum, docx file name & json file name don't match"
+      "docx checksum, docx file title & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      s"$defaultFileName.json",
+      defaultDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList ++ jsonFileIdInList,
       "docx checksum & json checksum don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
       "docx checksum, json checksum & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList ++ jsonFileIdInList,
-      "docx checksum, json checksum & docx file name don't match"
+      "docx checksum, json checksum & docx file title don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "docx checksum, json checksum, docx file name & json file name don't match"
+      "docx checksum, json checksum, docx file title & json file name don't match"
     )
   )
 
@@ -236,7 +238,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
   }
 
   forAll(contentObjectApiVsDdbStates) {
-    (docxChecksum, jsonChecksum, docxName, jsonName, idsThatFailed, reasonForFailure) =>
+    (docxChecksum, jsonChecksum, docxTitle, jsonName, idsThatFailed, reasonForFailure) =>
       "handleRequest" should s"return a 'wasReconciled' value of 'false' and a 'reason' message that contains " +
         s"these ids: $idsThatFailed if $reasonForFailure " in {
           val testUtils = new ExternalServicesTestUtils(dynamoServer)
@@ -244,8 +246,9 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
           val dynamoPostResponse = testUtils.dynamoPostResponse
             .replace(s""""S": "$defaultDocxChecksum"""", s""""S": "$docxChecksum"""")
             .replace(s""""S": "$defaultJsonChecksum"""", s""""S": "$jsonChecksum"""")
-            .replace(s""""S": "$defaultFileName.docx"""", s""""S": "$docxName"""")
-            .replace(s""""S": "$defaultFileName.json"""", s""""S": "$jsonName"""")
+            .replace(s""""S": "$defaultDocxTitle"""", s""""S": "$docxTitle"""")
+            .replace(s""""S": "$defaultDocxTitle.docx"""", s""""S": "$docxTitle.docx"""")
+            .replace(s""""S": "$defaultJsonName.json"""", s""""S": "$jsonName"""")
 
           testUtils.stubGetRequest(testUtils.dynamoGetResponse)
           testUtils.stubPostRequest(dynamoPostResponse)
