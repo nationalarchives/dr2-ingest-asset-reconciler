@@ -24,12 +24,17 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     dynamoServer.stop()
   }
 
+  val testUtils = new ExternalServicesTestUtils(dynamoServer)
+  import testUtils._
+
   private val defaultDocxChecksum = "f7523c5d03a2c850fa06b5bbfed4c216f6368826"
   private val defaultJsonChecksum = "a8cfe9e6b5c10a26046c849cd3776734626e74a2"
-  private val defaultFileName = "TEST-ID"
+  private val defaultDocxTitle = "TestTitle"
+  private val defaultJsonName = "TEST-ID"
 
   private val nonMatchingChecksumValue = "non-matchingChecksum"
-  private val nonMatchingFileName = "non-matchingFileName"
+  private val nonMatchingDocxTitle = "non-matchingDocxTitle"
+  private val nonMatchingJsonName = "non-matchingJsonName"
 
   private val docxFileIdInList = List("a25d33f3-7726-4fb3-8e6f-f66358451c4e")
   private val jsonFileIdInList = List("feedd76d-e368-45c8-96e3-c37671476793")
@@ -38,7 +43,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     (
       "DDB docxChecksum",
       "DDB jsonChecksum",
-      "DDB docx name",
+      "DDB docx title",
       "DDB json name",
       "ids that failed to match",
       "reason for failure"
@@ -46,157 +51,154 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     (
       defaultDocxChecksum,
       defaultJsonChecksum,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       jsonFileIdInList,
       "json file name doesn't match"
     ),
     (
       defaultDocxChecksum,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList,
-      "docx file name doesn't match"
+      "docx file title doesn't match"
     ),
     (
       defaultDocxChecksum,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "docx file name & json file name doesn't match"
+      "docx file title & json file name doesn't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      s"$defaultFileName.json",
+      defaultDocxTitle,
+      s"$defaultJsonName.json",
       jsonFileIdInList,
       "json checksum doesn't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       jsonFileIdInList,
       "json checksum & json file name don't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList ++ jsonFileIdInList,
-      "json checksum & docx file name don't match"
+      "json checksum & docx file title don't match"
     ),
     (
       defaultDocxChecksum,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "json checksum, docx file name & json file name don't match"
+      "json checksum, docx file title & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      s"$defaultFileName.docx",
-      s"$defaultFileName.json",
+      defaultDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList,
       "docx checksum doesn't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
       "docx checksum & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList,
-      "docx checksum & docx file name don't match"
+      "docx checksum & docx file title don't match"
     ),
     (
       nonMatchingChecksumValue,
       defaultJsonChecksum,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "docx checksum, docx file name & json file name don't match"
+      "docx checksum, docx file title & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      s"$defaultFileName.json",
+      defaultDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList ++ jsonFileIdInList,
       "docx checksum & json checksum don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      s"$defaultFileName.docx",
-      nonMatchingFileName,
+      defaultDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
       "docx checksum, json checksum & json file name don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      s"$defaultFileName.json",
+      nonMatchingDocxTitle,
+      s"$defaultJsonName.json",
       docxFileIdInList ++ jsonFileIdInList,
-      "docx checksum, json checksum & docx file name don't match"
+      "docx checksum, json checksum & docx file title don't match"
     ),
     (
       nonMatchingChecksumValue,
       nonMatchingChecksumValue,
-      nonMatchingFileName,
-      nonMatchingFileName,
+      nonMatchingDocxTitle,
+      nonMatchingJsonName,
       docxFileIdInList ++ jsonFileIdInList,
-      "docx checksum, json checksum, docx file name & json file name don't match"
+      "docx checksum, json checksum, docx file title & json file name don't match"
     )
   )
 
   "handleRequest" should "return an error if the asset is not found in Dynamo" in {
-    val testUtils = new ExternalServicesTestUtils(dynamoServer)
-    testUtils.stubGetRequest(testUtils.emptyDynamoGetResponse)
-    val testLambda = testUtils.TestLambda()
+    stubGetRequest(emptyDynamoGetResponse)
+    val testLambda = TestLambda()
     val ex = intercept[Exception] {
-      testLambda.handleRequest(testUtils.standardInput, testUtils.outputStream, null)
+      testLambda.handleRequest(standardInput, outputStream, null)
     }
-    ex.getMessage should equal(s"No asset found for ${testUtils.assetId} from ${testUtils.batchId}")
+    ex.getMessage should equal(s"No asset found for $assetId from $batchId")
 
     testLambda.verifyInvocationsAndArgumentsPassed(0, 0, 0, 0)
   }
 
   "handleRequest" should "return an error if the Dynamo entry does not have a type of 'Asset'" in {
-    val testUtils = new ExternalServicesTestUtils(dynamoServer)
-    testUtils.stubGetRequest(testUtils.dynamoGetResponse.replace(""""S": "Asset"""", """"S": "ArchiveFolder""""))
-    testUtils.stubPostRequest(testUtils.emptyDynamoPostResponse)
-    val testLambda = testUtils.TestLambda()
+    stubGetRequest(dynamoGetResponse.replace(""""S": "Asset"""", """"S": "ArchiveFolder""""))
+    stubPostRequest(emptyDynamoPostResponse)
+    val testLambda = TestLambda()
     val ex = intercept[Exception] {
-      testLambda.handleRequest(testUtils.standardInput, testUtils.outputStream, null)
+      testLambda.handleRequest(standardInput, outputStream, null)
     }
-    ex.getMessage should equal(s"Object ${testUtils.assetId} is of type ArchiveFolder and not 'Asset'")
+    ex.getMessage should equal(s"Object $assetId is of type ArchiveFolder and not 'Asset'")
 
     testLambda.verifyInvocationsAndArgumentsPassed(0, 0, 0, 0)
   }
 
   "handleRequest" should "return an error if there were no entities that had the asset name as the SourceId" in {
-    val testUtils = new ExternalServicesTestUtils(dynamoServer)
-    testUtils.stubGetRequest(testUtils.dynamoGetResponse)
-    testUtils.stubPostRequest(testUtils.dynamoPostResponse)
-    val testLambda = testUtils.TestLambda(entitiesWithIdentifier = IO.pure(Nil))
+    stubGetRequest(dynamoGetResponse)
+    stubPostRequest(dynamoPostResponse)
+    val testLambda = TestLambda(entitiesWithIdentifier = IO.pure(Nil))
     val ex = intercept[Exception] {
-      testLambda.handleRequest(testUtils.standardInput, testUtils.outputStream, null)
+      testLambda.handleRequest(standardInput, outputStream, null)
     }
     ex.getMessage should equal(s"No entity found using SourceId 'Test Name'")
 
@@ -204,28 +206,27 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
   }
 
   "handleRequest" should "return an error if no children are found for the asset" in {
-    val testUtils = new ExternalServicesTestUtils(dynamoServer)
-    testUtils.stubGetRequest(testUtils.dynamoGetResponse)
-    testUtils.stubPostRequest(testUtils.emptyDynamoPostResponse)
-    val testLambda = testUtils.TestLambda()
+    stubGetRequest(dynamoGetResponse)
+    stubPostRequest(emptyDynamoPostResponse)
+    val testLambda = TestLambda()
     val ex = intercept[Exception] {
-      testLambda.handleRequest(testUtils.standardInput, testUtils.outputStream, null)
+      testLambda.handleRequest(standardInput, outputStream, null)
     }
-    ex.getMessage should equal(s"No children were found for ${testUtils.assetId} from ${testUtils.batchId}")
+    ex.getMessage should equal(s"No children were found for $assetId from $batchId")
 
     testLambda.verifyInvocationsAndArgumentsPassed(numOfGetBitstreamInfoRequests = 0)
   }
 
   "handleRequest" should "return a 'wasReconciled' value of 'false' and a 'No entity found' 'reason' if there were no Content Objects belonging to the asset" in {
-    val testUtils = new ExternalServicesTestUtils(dynamoServer)
-    val outputStream = testUtils.outputStream
-    testUtils.stubGetRequest(testUtils.dynamoGetResponse)
-    testUtils.stubPostRequest(testUtils.dynamoPostResponse)
+    stubGetRequest(dynamoGetResponse)
+    stubPostRequest(dynamoPostResponse)
 
-    val testLambda = testUtils.TestLambda(contentObjectsFromReps = IO.pure(Nil))
-    testLambda.handleRequest(testUtils.standardInput, outputStream, null)
+    val outStream = outputStream
 
-    val stateOutput = read[StateOutput](outputStream.toByteArray.map(_.toChar).mkString)
+    val testLambda = TestLambda(contentObjectsFromReps = IO.pure(Nil))
+    testLambda.handleRequest(standardInput, outStream, null)
+
+    val stateOutput = read[StateOutput](outStream.toByteArray.map(_.toChar).mkString)
 
     stateOutput.wasReconciled should equal(false)
     stateOutput.reason should equal(
@@ -236,25 +237,25 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
   }
 
   forAll(contentObjectApiVsDdbStates) {
-    (docxChecksum, jsonChecksum, docxName, jsonName, idsThatFailed, reasonForFailure) =>
+    (docxChecksum, jsonChecksum, docxTitle, jsonName, idsThatFailed, reasonForFailure) =>
       "handleRequest" should s"return a 'wasReconciled' value of 'false' and a 'reason' message that contains " +
         s"these ids: $idsThatFailed if $reasonForFailure " in {
-          val testUtils = new ExternalServicesTestUtils(dynamoServer)
-          val outputStream = testUtils.outputStream
-          val dynamoPostResponse = testUtils.dynamoPostResponse
+          val outStream = outputStream
+          val updatedDynamoPostResponse = dynamoPostResponse
             .replace(s""""S": "$defaultDocxChecksum"""", s""""S": "$docxChecksum"""")
             .replace(s""""S": "$defaultJsonChecksum"""", s""""S": "$jsonChecksum"""")
-            .replace(s""""S": "$defaultFileName.docx"""", s""""S": "$docxName"""")
-            .replace(s""""S": "$defaultFileName.json"""", s""""S": "$jsonName"""")
+            .replace(s""""S": "$defaultDocxTitle"""", s""""S": "$docxTitle"""")
+            .replace(s""""S": "$defaultDocxTitle.docx"""", s""""S": "$docxTitle.docx"""")
+            .replace(s""""S": "$defaultJsonName.json"""", s""""S": "$jsonName"""")
 
-          testUtils.stubGetRequest(testUtils.dynamoGetResponse)
-          testUtils.stubPostRequest(dynamoPostResponse)
+          stubGetRequest(dynamoGetResponse)
+          stubPostRequest(updatedDynamoPostResponse)
 
-          val testLambda = testUtils.TestLambda()
+          val testLambda = TestLambda()
 
-          testLambda.handleRequest(testUtils.standardInput, outputStream, null)
+          testLambda.handleRequest(standardInput, outStream, null)
 
-          val stateOutput = read[StateOutput](outputStream.toByteArray.map(_.toChar).mkString)
+          val stateOutput = read[StateOutput](outStream.toByteArray.map(_.toChar).mkString)
 
           stateOutput.wasReconciled should equal(false)
           stateOutput.reason should equal(
@@ -267,15 +268,15 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
   }
 
   "handleRequest" should "return a 'wasReconciled' value of 'true' and an empty 'reason' if COs could be reconciled" in {
-    val testUtils = new ExternalServicesTestUtils(dynamoServer)
-    val outputStream = testUtils.outputStream
-    testUtils.stubGetRequest(testUtils.dynamoGetResponse)
-    testUtils.stubPostRequest(testUtils.dynamoPostResponse)
-    val testLambda = testUtils.TestLambda()
+    stubGetRequest(dynamoGetResponse)
+    stubPostRequest(dynamoPostResponse)
+    val outStream = outputStream
 
-    testLambda.handleRequest(testUtils.standardInput, outputStream, null)
+    val testLambda = TestLambda()
 
-    val stateOutput = read[StateOutput](outputStream.toByteArray.map(_.toChar).mkString)
+    testLambda.handleRequest(standardInput, outStream, null)
+
+    val stateOutput = read[StateOutput](outStream.toByteArray.map(_.toChar).mkString)
 
     stateOutput.wasReconciled should equal(true)
     stateOutput.reason should equal("")
