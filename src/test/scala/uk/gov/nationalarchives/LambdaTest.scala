@@ -176,7 +176,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     val ex = intercept[Exception] {
       testLambda.handleRequest(standardInput, outputStream, null)
     }
-    ex.getMessage should equal(s"No asset found for ${assetId} from ${batchId}")
+    ex.getMessage should equal(s"No asset found for $assetId from $batchId")
 
     testLambda.verifyInvocationsAndArgumentsPassed(0, 0, 0, 0)
   }
@@ -188,7 +188,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     val ex = intercept[Exception] {
       testLambda.handleRequest(standardInput, outputStream, null)
     }
-    ex.getMessage should equal(s"Object ${assetId} is of type ArchiveFolder and not 'Asset'")
+    ex.getMessage should equal(s"Object $assetId is of type ArchiveFolder and not 'Asset'")
 
     testLambda.verifyInvocationsAndArgumentsPassed(0, 0, 0, 0)
   }
@@ -212,7 +212,7 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
     val ex = intercept[Exception] {
       testLambda.handleRequest(standardInput, outputStream, null)
     }
-    ex.getMessage should equal(s"No children were found for ${assetId} from ${batchId}")
+    ex.getMessage should equal(s"No children were found for $assetId from $batchId")
 
     testLambda.verifyInvocationsAndArgumentsPassed(numOfGetBitstreamInfoRequests = 0)
   }
