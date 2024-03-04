@@ -10,8 +10,8 @@ jobs:
   pre-deploy:
     uses: nationalarchives/dr2-github-actions/.github/workflows/lambda_build.yml@main
     with:
-      repo-name: dr2-ingest-asset-reconciler-lambda
-      artifact-name: dr2-ingest-asset-reconciler-lambda
+      repo-name: dr2-ingest-asset-reconciler
+      artifact-name: dr2-ingest-asset-reconciler
       build-command: sbt assembly
     secrets:
       MANAGEMENT_ACCOUNT: ${{ secrets.MANAGEMENT_ACCOUNT }}
