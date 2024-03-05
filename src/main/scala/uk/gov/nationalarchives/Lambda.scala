@@ -100,7 +100,9 @@ class Lambda extends RequestStreamHandler {
                     title => // DDB titles don't have file extensions, CO titles do
                       val titleWithoutExtension = title.split('.').dropRight(1).mkString(".")
                       lazy val fileNameWithoutExtension = child.name.split('.').dropRight(1).mkString(".")
-                      titleWithoutExtension == child.title.getOrElse(fileNameWithoutExtension)
+                      val titleOrFileName = child.title.getOrElse(fileNameWithoutExtension)
+                      val assetChildTitle = if (titleOrFileName.isEmpty) fileNameWithoutExtension else titleOrFileName
+                      titleWithoutExtension == assetChildTitle
                   }
                 }
 
