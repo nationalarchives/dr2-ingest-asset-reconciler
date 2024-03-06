@@ -107,6 +107,9 @@ class ExternalServicesTestUtils(dynamoServer: WireMockServer) extends TableDrive
        |      "checksum_sha256": {
        |        "S": "a8cfe9e6b5c10a26046c849cd3776734626e74a2"
        |      },
+       |      "title": {
+       |        "S": ""
+       |      },
        |      "fileExtension": {
        |        "S": "json"
        |      },

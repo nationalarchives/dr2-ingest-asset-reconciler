@@ -283,4 +283,31 @@ class LambdaTest extends AnyFlatSpec with BeforeAndAfterEach with TableDrivenPro
 
     testLambda.verifyInvocationsAndArgumentsPassed()
   }
+
+  "handleRequest" should "return a 'wasReconciled' value of 'true' and an empty 'reason' if COs could be reconciled, " +
+    "even if one of the Asset's child's title, was not present in the table" in {
+      stubGetRequest(dynamoGetResponse)
+
+      val updatedDynamoPostResponse = dynamoPostResponse.replace(
+        """      "title": {
+        |        "S": ""
+        |      },
+        |""".stripMargin,
+        ""
+      )
+      println(updatedDynamoPostResponse)
+      stubPostRequest(updatedDynamoPostResponse)
+      val outStream = outputStream
+
+      val testLambda = TestLambda()
+
+      testLambda.handleRequest(standardInput, outStream, null)
+
+      val stateOutput = read[StateOutput](outStream.toByteArray.map(_.toChar).mkString)
+
+      stateOutput.wasReconciled should equal(true)
+      stateOutput.reason should equal("")
+
+      testLambda.verifyInvocationsAndArgumentsPassed()
+    }
 }
